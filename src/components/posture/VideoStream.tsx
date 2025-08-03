@@ -3,6 +3,7 @@ import { useCamera } from '@/hooks/useCamera';
 import { MediaPipeService } from '@/services/mediapipe';
 import { PostureAnalyzer } from '@/services/postureAnalysis';
 import type { PostureAnalysisResult } from '@/services/postureAnalysis';
+import { Button } from '@/components/ui/button';
 
 export function VideoStream() {
   const { videoRef, isLoading, error, hasPermission } = useCamera();
@@ -13,6 +14,7 @@ export function VideoStream() {
   
   const [isInitializing, setIsInitializing] = useState(true);
   const [postureResult, setPostureResult] = useState<PostureAnalysisResult | null>(null);
+  const [showVideoFeed, setShowVideoFeed] = useState(true);
 
   useEffect(() => {
     async function initialize() {
@@ -49,12 +51,12 @@ export function VideoStream() {
       const analysis = analyzerRef.current.analyze(poseResult, faceResult);
       setPostureResult(analysis);
 
-      drawLandmarks(poseResult, faceResult);
+      drawLandmarks(poseResult, faceResult, showVideoFeed);
 
       animationRef.current = requestAnimationFrame(processFrame);
     }
 
-    function drawLandmarks(poseResult: any, faceResult: any) {
+    function drawLandmarks(poseResult: any, faceResult: any, drawVideo: boolean) {
       if (!canvasRef.current || !videoRef.current) return;
 
       const ctx = canvasRef.current.getContext('2d');
@@ -64,6 +66,11 @@ export function VideoStream() {
       canvasRef.current.height = videoRef.current.videoHeight;
 
       ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+
+      if (!drawVideo) {
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
 
       if (poseResult?.landmarks?.[0]) {
         ctx.fillStyle = '#00ff00';
@@ -98,7 +105,7 @@ export function VideoStream() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [hasPermission, isInitializing]);
+  }, [hasPermission, isInitializing, showVideoFeed]);
 
   if (error) {
     return (
@@ -119,17 +126,29 @@ export function VideoStream() {
 
   return (
     <div className="relative">
+      <div className="mb-4">
+        <Button
+          onClick={() => setShowVideoFeed(!showVideoFeed)}
+          variant="outline"
+        >
+          {showVideoFeed ? 'Hide' : 'Show'} Camera Feed
+        </Button>
+      </div>
+      
       <div className="relative inline-block">
         <video
           ref={videoRef}
           className="rounded-lg mirror"
-          style={{ transform: 'scaleX(-1)' }}
+          style={{ 
+            transform: 'scaleX(-1)',
+            display: showVideoFeed ? 'block' : 'none'
+          }}
           playsInline
           muted
         />
         <canvas
           ref={canvasRef}
-          className="absolute top-0 left-0 rounded-lg"
+          className={`rounded-lg ${!showVideoFeed ? '' : 'absolute top-0 left-0'}`}
           style={{ transform: 'scaleX(-1)' }}
         />
       </div>

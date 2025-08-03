@@ -18,7 +18,7 @@ function PostureAnalyzer() {
           </p>
         </header>
         
-        <main className="max-w-4xl mx-auto">
+        <main>
           <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
               Live Video Analysis
