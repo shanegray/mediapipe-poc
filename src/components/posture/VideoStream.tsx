@@ -71,6 +71,10 @@ export function VideoStream() {
 					confidence: analysis.confidence,
 					cva: analysis.details.cva,
 					shoulderZDiff: analysis.metrics?.shoulderZDiff,
+					earShoulderDist: analysis.metrics?.earShoulderDistance,
+					elbowRatio: analysis.metrics?.elbowShoulderRatio,
+					shoulderElevation: analysis.details.shoulderElevation,
+					upperBodyAlign: analysis.details.upperBodyAlignment,
 					issues: analysis.issues,
 				});
 			}
@@ -236,6 +240,33 @@ export function VideoStream() {
 							Head Forward:{" "}
 							{postureResult.metrics.headForwardDistance.toFixed(1)}%
 							[threshold: 20%]
+						</p>
+					)}
+					{postureResult.metrics?.earShoulderDistance !== undefined && (
+						<p className="text-xs mb-1 text-gray-600 dark:text-gray-400">
+							Ear-Shoulder Distance:{" "}
+							{postureResult.metrics.earShoulderDistance.toFixed(1)}%
+							{postureResult.metrics.earShoulderDistance < 15
+								? " (Hunched)"
+								: " (Normal)"}
+							[normal: 15-25%]
+						</p>
+					)}
+					{postureResult.metrics?.shoulderHipAngle !== undefined && (
+						<p className="text-xs mb-1 text-gray-600 dark:text-gray-400">
+							Shoulder-Hip Angle:{" "}
+							{postureResult.metrics.shoulderHipAngle.toFixed(1)}° [normal: &lt;
+							10°]
+						</p>
+					)}
+					{postureResult.metrics?.elbowShoulderRatio !== undefined && (
+						<p className="text-xs mb-1 text-gray-600 dark:text-gray-400">
+							Elbow-Shoulder Ratio:{" "}
+							{postureResult.metrics.elbowShoulderRatio.toFixed(1)}%
+							{postureResult.metrics.elbowShoulderRatio < 85
+								? " (Hunched)"
+								: " (Normal)"}
+							[normal: 85-100%]
 						</p>
 					)}
 					{postureResult.issues.length > 0 && (

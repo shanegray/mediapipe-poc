@@ -16,6 +16,8 @@ export interface PostureAnalysisResult {
 		shoulderProtraction?: boolean;
 		forwardHeadPosture?: boolean;
 		cva?: number; // Craniovertebral angle in degrees
+		shoulderElevation?: boolean; // New: Detect hunched/elevated shoulders
+		upperBodyAlignment?: boolean; // New: Check overall upper body alignment
 	};
 	metrics?: {
 		shoulderWidth?: number;
@@ -23,6 +25,9 @@ export interface PostureAnalysisResult {
 		neckAngleDegrees?: number;
 		shoulderHeightDiff?: number;
 		headForwardDistance?: number;
+		earShoulderDistance?: number; // New: Distance from ear to shoulder
+		shoulderHipAngle?: number; // New: Angle of shoulder-hip line
+		elbowShoulderRatio?: number; // New: Elbow position relative to shoulders
 	};
 }
 
@@ -87,6 +92,10 @@ export class PostureAnalyzer {
 			: undefined;
 		const cva = this.calculateCVA(smoothedPose, smoothedFace);
 		const forwardHeadPosture = cva !== undefined && cva < 45; // Adjusted threshold from 48 to 45
+		
+		// Additional detection for shoulder hunch/elevation
+		const shoulderElevation = this.checkShoulderElevation(smoothedPose);
+		const upperBodyAlignment = this.checkUpperBodyAlignment(smoothedPose);
 
 		const issues: string[] = [];
 		if (!shoulderAlignment) issues.push("Shoulders are uneven");
@@ -96,6 +105,8 @@ export class PostureAnalyzer {
 		if (forwardHeadPosture) issues.push("Forward head posture (CVA < 45°)");
 		if (shoulderProtraction === false)
 			issues.push("Rounded shoulders (protraction)");
+		if (!shoulderElevation) issues.push("Shoulders are elevated/hunched");
+		if (!upperBodyAlignment) issues.push("Poor upper body alignment");
 
 		const checks = [
 			shoulderAlignment,
@@ -104,6 +115,8 @@ export class PostureAnalyzer {
 			chinPosition,
 			shoulderProtraction !== false,
 			!forwardHeadPosture,
+			shoulderElevation,
+			upperBodyAlignment,
 		];
 		const goodPostureCount = checks.filter(Boolean).length;
 		const confidence = goodPostureCount / checks.length;
@@ -122,6 +135,8 @@ export class PostureAnalyzer {
 				shoulderProtraction,
 				forwardHeadPosture,
 				cva,
+				shoulderElevation,
+				upperBodyAlignment,
 			},
 			metrics: {
 				shoulderWidth: use3D ? shoulderWidth : undefined,
@@ -138,6 +153,9 @@ export class PostureAnalyzer {
 					smoothedPose,
 					shoulderWidth,
 				),
+				earShoulderDistance: this.getEarShoulderDistance(smoothedPose),
+				shoulderHipAngle: this.getShoulderHipAngle(smoothedPose),
+				elbowShoulderRatio: this.getElbowShoulderRatio(smoothedPose),
 			},
 		};
 	}
@@ -441,5 +459,120 @@ export class PostureAnalyzer {
 
 		const forwardTilt = nose.x - shoulderMidpoint.x;
 		return (forwardTilt / shoulderWidth) * 100; // Return as percentage
+	}
+
+	private checkShoulderElevation(landmarks: NormalizedLandmark[]): boolean {
+		// Check if shoulders are hunched up towards ears
+		const leftEar = landmarks[7];
+		const rightEar = landmarks[8];
+		const leftShoulder = landmarks[11];
+		const rightShoulder = landmarks[12];
+
+		if (!leftEar || !rightEar || !leftShoulder || !rightShoulder) return true;
+
+		// Calculate vertical distance between ears and shoulders
+		const leftEarShoulderDist = Math.abs(leftEar.y - leftShoulder.y);
+		const rightEarShoulderDist = Math.abs(rightEar.y - rightShoulder.y);
+
+		// Average the distances
+		const avgEarShoulderDist = (leftEarShoulderDist + rightEarShoulderDist) / 2;
+
+		// Threshold: if distance is too small, shoulders are hunched
+		// In normalized coordinates, good posture has ~0.15-0.2 distance
+		return avgEarShoulderDist > 0.12; // Relaxed threshold
+	}
+
+	private checkUpperBodyAlignment(landmarks: NormalizedLandmark[]): boolean {
+		// Check alignment of shoulders, elbows, and hips
+		const leftShoulder = landmarks[11];
+		const rightShoulder = landmarks[12];
+		const leftElbow = landmarks[13];
+		const rightElbow = landmarks[14];
+		const leftHip = landmarks[23];
+		const rightHip = landmarks[24];
+
+		if (
+			!leftShoulder ||
+			!rightShoulder ||
+			!leftElbow ||
+			!rightElbow ||
+			!leftHip ||
+			!rightHip
+		)
+			return true;
+
+		// Check if elbows are properly positioned relative to shoulders
+		// When hunched, elbows tend to move forward
+		const shoulderMidX = (leftShoulder.x + rightShoulder.x) / 2;
+		const elbowMidX = (leftElbow.x + rightElbow.x) / 2;
+		const hipMidX = (leftHip.x + rightHip.x) / 2;
+
+		// Calculate alignment score
+		const elbowForwardness = Math.abs(elbowMidX - shoulderMidX);
+		const shoulderHipAlignment = Math.abs(shoulderMidX - hipMidX);
+
+		// Good posture: elbows aligned with shoulders, shoulders aligned with hips
+		return elbowForwardness < 0.1 && shoulderHipAlignment < 0.1;
+	}
+
+	private getEarShoulderDistance(landmarks: NormalizedLandmark[]): number {
+		const leftEar = landmarks[7];
+		const rightEar = landmarks[8];
+		const leftShoulder = landmarks[11];
+		const rightShoulder = landmarks[12];
+
+		if (!leftEar || !rightEar || !leftShoulder || !rightShoulder) return 0;
+
+		const leftDist = Math.sqrt(
+			(leftEar.x - leftShoulder.x) ** 2 +
+				(leftEar.y - leftShoulder.y) ** 2,
+		);
+		const rightDist = Math.sqrt(
+			(rightEar.x - rightShoulder.x) ** 2 +
+				(rightEar.y - rightShoulder.y) ** 2,
+		);
+
+		return ((leftDist + rightDist) / 2) * 100; // Return as percentage
+	}
+
+	private getShoulderHipAngle(landmarks: NormalizedLandmark[]): number {
+		const leftShoulder = landmarks[11];
+		const rightShoulder = landmarks[12];
+		const leftHip = landmarks[23];
+		const rightHip = landmarks[24];
+
+		if (!leftShoulder || !rightShoulder || !leftHip || !rightHip) return 90;
+
+		const shoulderMid = {
+			x: (leftShoulder.x + rightShoulder.x) / 2,
+			y: (leftShoulder.y + rightShoulder.y) / 2,
+		};
+		const hipMid = {
+			x: (leftHip.x + rightHip.x) / 2,
+			y: (leftHip.y + rightHip.y) / 2,
+		};
+
+		// Calculate angle from vertical
+		const angleRad = Math.atan2(
+			shoulderMid.x - hipMid.x,
+			hipMid.y - shoulderMid.y,
+		);
+		return Math.abs(angleRad * (180 / Math.PI));
+	}
+
+	private getElbowShoulderRatio(landmarks: NormalizedLandmark[]): number {
+		const leftShoulder = landmarks[11];
+		const rightShoulder = landmarks[12];
+		const leftElbow = landmarks[13];
+		const rightElbow = landmarks[14];
+
+		if (!leftShoulder || !rightShoulder || !leftElbow || !rightElbow) return 0;
+
+		const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+		const elbowWidth = Math.abs(rightElbow.x - leftElbow.x);
+
+		// Ratio of elbow width to shoulder width
+		// When hunched, elbows come closer together
+		return shoulderWidth > 0 ? (elbowWidth / shoulderWidth) * 100 : 100;
 	}
 }
