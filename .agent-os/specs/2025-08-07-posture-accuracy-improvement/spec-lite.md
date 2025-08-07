@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Research and implement an improved posture detection algorithm that accurately identifies rounded shoulders, forward head posture, and general bad posture from multiple camera angles. Create comprehensive research documentation on ergonomic standards and detection methods, evaluate MediaPipe and alternatives, then update the POC with a research-based algorithm prioritizing accuracy over performance.
