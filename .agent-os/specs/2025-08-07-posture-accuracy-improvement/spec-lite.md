@@ -1,3 +1,3 @@
 # Spec Summary (Lite)
 
-Research and implement an improved posture detection algorithm that accurately identifies rounded shoulders, forward head posture, and general bad posture from multiple camera angles. Create comprehensive research documentation on ergonomic standards and detection methods, evaluate MediaPipe and alternatives, then update the POC with a research-based algorithm prioritizing accuracy over performance.
+Evaluate existing pre-trained pose detection models to find the most cost-effective solution for posture analysis. Test Google models (MoveNet, BlazePose, Cloud Vision), advanced models (MMPose, OpenPose, ViTPose), and compare real-time vs interval-based capture approaches. Deliver comprehensive cost analysis, accuracy metrics, and working prototypes to answer: "What is the cheapest way to analyze a user's posture while they sit at their desk?"

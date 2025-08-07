@@ -1,45 +1,49 @@
 # Spec Requirements Document
 
-> Spec: Posture Accuracy Improvement
+> Spec: Cost-Effective Posture Detection Model Evaluation
 > Created: 2025-08-07
-> Status: Planning
+> Status: In Progress
 
 ## Overview
 
-Research and implement an improved posture detection algorithm that accurately identifies rounded shoulders, forward head posture, and general bad posture from multiple camera angles. This enhancement will replace the current simplistic algorithm with a comprehensive, research-based approach prioritizing accuracy over performance.
+Evaluate existing pre-trained pose detection models to find the most cost-effective solution for accurate posture analysis. This POC aims to answer: "What is the cheapest way to analyze a user's posture while they sit at their desk?" Given MediaPipe's browser limitations, we will evaluate alternative models including server-side deployments, interval-based capture, and other browser-compatible solutions.
 
 ## User Stories
 
-### Accurate Posture Detection
+### Cost-Effective Posture Detection
 
-As a user monitoring my posture, I want the system to accurately detect when my shoulders are rounded or when I have poor posture, so that I receive meaningful feedback to improve my ergonomic health.
+As a product owner, I want to identify the most cost-effective way to analyze user posture, so that we can provide affordable posture monitoring without expensive infrastructure.
 
-The current system uses basic landmark distance measurements that fail to detect common posture problems like rounded shoulders (shoulder protraction), forward head posture, and spinal misalignment. Users need reliable detection that matches what a physiotherapist would identify as poor posture, with the ability to work from both front-facing and side-view camera angles.
+The current MediaPipe browser implementation has proven insufficient for accurate posture detection. We need to evaluate alternative models and deployment strategies, comparing accuracy against total cost of ownership including infrastructure, API calls, and development complexity.
 
-### Research-Based Analysis
+### Model Evaluation Framework
 
-As a developer, I want comprehensive research documentation on posture detection methods, so that I can implement the most effective algorithms based on ergonomic studies and existing solutions.
+As a developer, I want comprehensive evaluation of existing pose detection models, so that I can make an informed decision on which solution provides the best accuracy-to-cost ratio.
 
-This research will explore academic findings, existing posture analysis applications, and practical implementation approaches to determine the best methods for detecting various posture issues using computer vision and pose estimation technologies.
+This evaluation will test pre-trained models from Google (MoveNet, BlazePose variants), open-source solutions (MMPose, OpenPose), and compare real-time streaming versus interval-based capture approaches to find the optimal balance of accuracy, cost, and user experience.
 
 ## Spec Scope
 
-1. **Research Documentation** - Comprehensive research paper documenting posture detection methods, ergonomic standards, and technology capabilities
-2. **Algorithm Enhancement** - Improved posture analysis algorithm detecting rounded shoulders, forward head, spine curvature, and pelvic tilt
-3. **Multi-Angle Support** - Detection capabilities for both front-facing and side-view camera positions
-4. **Technology Evaluation** - Assessment of MediaPipe capabilities and alternative solutions (OpenPose, PoseNet, MoveNet, cloud APIs)
-5. **POC Update** - Updated proof of concept implementing the improved algorithm with accuracy prioritization
+1. **Model Evaluation Matrix** - Test and compare existing pre-trained models for accuracy and cost
+2. **Google Models Assessment** - MediaPipe server-side, MoveNet, BlazePose variants, Cloud Vision API
+3. **Advanced Models Research** - MMPose, OpenPose, ViTPose with infrastructure requirements
+4. **Deployment Strategy Comparison** - Real-time streaming vs interval-based capture analysis
+5. **Cost Analysis** - Monthly/yearly cost projections for each solution at scale
+6. **Browser Compatibility Testing** - Evaluate browser-native solutions (TensorFlow.js, ONNX Runtime Web)
 
 ## Out of Scope
 
-- Performance optimization (will be addressed in future iterations)
-- Real-time calibration features
-- Historical data tracking
-- UI/UX enhancements beyond necessary debugging displays
-- Mobile device support
+- Training new ML models
+- Building custom pose detection algorithms
+- Mobile-specific implementations
+- Hardware solutions (depth cameras, specialized sensors)
+- Clinical-grade accuracy requirements
+- User authentication and data persistence
 
 ## Expected Deliverable
 
-1. Research paper in markdown format with findings on posture detection methods and technology capabilities
-2. Enhanced postureAnalysis.ts with improved detection algorithms based on research
-3. Working POC demonstrating accurate detection of rounded shoulders and poor posture from multiple angles
+1. **Model Evaluation Report** - Comprehensive comparison of all tested models with accuracy metrics
+2. **Cost Analysis Document** - Detailed breakdown of infrastructure and operational costs per solution
+3. **Working Prototypes** - Top 3 most promising approaches implemented and tested
+4. **Recommendation Report** - Clear winner for "cheapest effective solution" with justification
+5. **Decision Matrix** - Stakeholder-friendly comparison table of all options
