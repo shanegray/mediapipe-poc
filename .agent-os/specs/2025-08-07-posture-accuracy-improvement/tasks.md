@@ -2,15 +2,15 @@
 
 ## Tasks
 
-- [ ] 1. Quick Wins Implementation (Based on o3-pro Research)
-  - [ ] 1.1 Write tests for new detection functions
-  - [ ] 1.2 Switch to worldLandmarks for 3D coordinates
-  - [ ] 1.3 Implement shoulder width normalization
-  - [ ] 1.4 Implement CVA (Craniovertebral Angle) calculation
-  - [ ] 1.5 Add z-axis shoulder protraction detection
-  - [ ] 1.6 Fix angle calculations (use vectors not distances)
-  - [ ] 1.7 Add 3-5 frame landmark smoothing
-  - [ ] 1.8 Verify all tests pass
+- [x] 1. Quick Wins Implementation (Based on o3-pro Research)
+  - [x] 1.1 Write tests for new detection functions
+  - [x] 1.2 Switch to worldLandmarks for 3D coordinates
+  - [x] 1.3 Implement shoulder width normalization
+  - [x] 1.4 Implement CVA (Craniovertebral Angle) calculation
+  - [x] 1.5 Add z-axis shoulder protraction detection
+  - [x] 1.6 Fix angle calculations (use vectors not distances)
+  - [x] 1.7 Add 3-5 frame landmark smoothing (now 5 frames)
+  - [x] 1.8 Verify all tests pass
 
 - [ ] 2. Enhanced Algorithm Implementation
   - [ ] 2.1 Write tests for clinical thresholds
