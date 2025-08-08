@@ -84,9 +84,13 @@ Before moving on to other models, there are two MediaPipe-based applications tha
 
 Most apps I've seen using pose detection use a side-on camera view, and the results don't look particularly accurate, but these two might offer insights into how others have approached the problem.
 
+**Initial findings from PostureScreen investigation:**
+- Side-view camera, while not great, could be an option for detecting back angles
+- Using face landmarks to determine the z-index of the face (which way it's pointing), in conjunction with other pose landmarks, could help determine if the user is looking down/up rather than straight ahead - potentially useful for approximating slouch
+
 ### Further Research Into Other Models
 
-I've conducted additional research into off-the-shelf posture detection solutions (see [Perplexity Research Summary](./perplexity-off-the-shelf-2025-08-08.md)). Key findings include:
+I've conducted additional research into off-the-shelf posture detection solutions (see [Research Summary](./perplexity-off-the-shelf-2025-08-08.md)). Key findings include:
 
 - **SitPose (2024):** Achieving 98.1% F1 score using ensemble learning with Azure Kinect depth camera
 - **YOLOv5 Sitting Posture Detection:** Open-source real-time lateral posture detection from webcam streams
@@ -100,15 +104,16 @@ Based on my research, here's the planned testing sequence:
 
 We'll start with Google's ecosystem since we're already familiar with it:
 
-- **MoveNet (TensorFlow.js)** - Browser-based, free, three variants to test
+- **MoveNet (TensorFlow.js)** - Browser-based, free, three variants to test. **Briefly tested** - more accurate than MediaPipe but suffers from the same fundamental issue: will likely need a side-on view to determine back angles to approximate slouch
 - **MediaPipe Server-Side** - Python/Node.js versions might have better accuracy
-- **BlazePose Variants** - Test full, lite, and heavy versions
+- **BlazePose Variants** - Test full, lite, and heavy versions. **Briefly tested** - similar limitations as MoveNet
 - **Google Cloud Vision API** - Their commercial offering
 
 ### Phase 2: Advanced Open-Source Models
 
 If Google's options don't meet our needs:
 
+- **Hugging Face Posture Detection Models** - Investigating [postureDetection](https://huggingface.co/ronka/postureDetection/tree/main) which has extensive training data and potential for fine-tuning
 - **MMPose** - Current state-of-the-art, needs GPU server
 - **OpenPose** - CMU's battle-tested solution
 - **ViTPose** - Latest vision transformer approach
