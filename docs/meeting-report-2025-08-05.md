@@ -45,32 +45,18 @@ Switched to Google's MediaPipe (I had switched to MediaPipe within the Electron 
 ### What I Discovered
 
 After extensive testing and analysis, I found the core issue: MediaPipe places shoulder landmarks near where it thinks the shoulder joint is.
-With my testing, I've found the placement of the landmarks to be inaccurate.
+With my testing, I've found the placement of the landmarks to be inaccurate. It generally looks like the placement is just outside the armpits (at least for me).
+Which would make sense in what the AI model is trained for: Tracking human poses and movement.
 
-When you turn sideways, it can still track the shoulder joints, arm angles and back angles (if available) but it's not accurate.
+Also, when you turn sideways it can still track the shoulder joints, arm angles and back angles (if available) but it's not accurate.
 
 **Test results that show the problem:**
+
+Taken from local Unit Tests:
 
 - Good posture (side view) → 62% confidence
 - Bad posture (side view) → 75% confidence (higher than good!)
 - Elbow width measuring wider than shoulders (physically impossible)
-
----
-
-## Why This Matters
-
-The problem is fundamental to how MediaPipe works:
-
-```
-What actually happens:        What MediaPipe detects:
-      👤                            👤
-     /│\                           /│\
-    ● │ ●  (actual joints)       ●   ●  (visible edges)
-```
-
-MediaPipe was designed for general pose estimation - things like fitness apps, dance games, gesture control. It's optimized for speed and works great for those use cases. But for clinical posture assessment, we need landmarks on actual anatomical joints, not just visible body edges.
-
-This explains why the system can't detect rounded shoulders or forward head posture reliably - it's literally looking at the wrong points on the body.
 
 ---
 
@@ -122,5 +108,5 @@ If that doesn't work:
 I've documented the detailed research in separate files:
 
 - [Comprehensive Research Plan](./research-plan.md) - Analysis of all alternatives
-- [Academic Research Findings](./deep-research-2025-08-07.md) - What the literature says about posture detection
+- [AI Research Findings](./deep-research-2025-08-07.md) - Configuring an AI Agent to research and find alternatives.
 - [Off-the-Shelf Solutions Research](./perplexity-off-the-shelf-2025-08-08.md) - State-of-the-art posture detection landscape (2024-2025)

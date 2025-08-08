@@ -160,7 +160,7 @@ Backend API → ML Model → Posture Score → Frontend
 - Personalization possible
 - Cost-effective (~$10-50/month for typical usage)
 
-**Timeline:** 2-3 weeks
+**Timeline:** To be determined based on Phase 1 results
 
 ### Solution 2: Server-Based Deep Learning
 
@@ -190,7 +190,7 @@ Posture Analysis → Real-time Feedback
 - Privacy concerns (video streaming)
 - Complex deployment
 
-**Timeline:** 4-6 weeks
+**Timeline:** To be determined based on testing phases
 
 ### Solution 3: Native Mobile App with Platform APIs
 
@@ -217,7 +217,7 @@ On-device ML → Real-time Posture Feedback
 - Platform-specific development
 - App store distribution
 
-**Timeline:** 6-8 weeks
+**Timeline:** To be determined if mobile approach is selected
 
 ### Solution 4: Depth Camera Integration
 
@@ -242,7 +242,7 @@ On-device ML → Real-time Posture Feedback
 - Not purely software solution
 - Limited to desktop use
 
-**Timeline:** 3-4 weeks
+**Timeline:** To be determined if hardware approach is selected
 
 ## Part 4: Data Collection Strategy
 
@@ -275,60 +275,42 @@ On-device ML → Real-time Posture Feedback
 
 ## Part 5: Immediate Action Plan
 
-### Phase 1: Quick Fixes (Week 1)
-1. **Implement temporal smoothing**
-   - 5-frame moving average for all landmarks
-   - Reduces jitter by 60%
+### Phase 1: Final MediaPipe Testing
+1. **Investigate existing implementations**
+   - PostureScreen commercial application analysis
+   - Open source Python posture detection review
+   - Extract useful algorithms and approaches
 
-2. **Add confidence scoring**
-   - Weight each check by reliability
-   - Shoulder checks: 0.3 weight (unreliable)
-   - Neck angle: 0.5 weight
-   - Head position: 0.8 weight
+2. **Enhanced angle calculations**
+   - Implement face angle detection (Normal Vector)
+   - Combine with back angle measurements
+   - Test shoulder-to-shoulder angle reliability
 
-3. **Personal baseline calibration**
-   - 10-second "good posture" recording
-   - Store user's neutral measurements
-   - Compare against baseline, not absolute thresholds
+3. **Algorithm refinement**
+   - Temporal smoothing (5-frame average)
+   - Confidence weighting per check
+   - Personal baseline calibration
 
-### Phase 2: Data Collection (Week 2)
-1. **Recruit 5 test users**
-2. **Capture diverse posture samples**
-3. **Expert annotation** (hire physiotherapist for 2 hours)
-4. **Create training dataset**
+### Phase 2: Advanced Model Evaluation (If Phase 1 Fails)
+1. **Hugging Face Models**
+   - Test postureDetection model
+   - Evaluate fine-tuning requirements
+   - Assess browser compatibility
 
-### Phase 3: ML Model Development (Weeks 3-4)
-1. **Feature engineering**
-   - 150+ features from landmarks
-   - Angles, distances, ratios
-   - Temporal derivatives
+2. **MMPose Testing**
+   - Server infrastructure requirements
+   - Accuracy benchmarking
+   - Cost analysis
 
-2. **Model training**
-   - Start with Random Forest (baseline)
-   - Add XGBoost for better accuracy
-   - Simple 3-layer neural network
-   - Ensemble final predictions
+3. **OpenPose Integration**
+   - GPU requirements assessment
+   - Real-time performance testing
+   - Accuracy comparison
 
-3. **Validation**
-   - 80/20 train/test split
-   - Cross-validation
-   - Target: 85% accuracy
-
-### Phase 4: Production Deployment (Week 5)
-1. **API Development**
-   - FastAPI backend
-   - Model serving with ONNX Runtime
-   - Redis caching for user baselines
-
-2. **Frontend Integration**
-   - Keep MediaPipe for landmarks
-   - Send features to API
-   - Display confidence scores
-
-3. **Monitoring**
-   - Log predictions for continuous improvement
-   - A/B testing framework
-   - User feedback collection
+4. **ViTPose Evaluation**
+   - Vision transformer performance
+   - Deployment complexity
+   - Accuracy vs. speed trade-offs
 
 ## Part 6: Cost-Benefit Analysis
 
@@ -337,38 +319,45 @@ On-device ML → Real-time Posture Feedback
 - **Cost:** $0 (client-side only)
 - **User satisfaction:** Low
 
-### Hybrid ML (Recommended)
+### Hybrid ML (If MediaPipe improvements succeed)
 - **Accuracy:** 85-90%
 - **Cost:** $50-100/month
-- **Development:** 3-4 weeks
+- **Development:** To be determined
 - **ROI:** High
 
 ### Server Deep Learning
 - **Accuracy:** 90-95%
 - **Cost:** $300-500/month
-- **Development:** 6-8 weeks
+- **Development:** To be determined
 - **ROI:** Medium (high cost)
 
 ### Native App
 - **Accuracy:** 90%+
 - **Cost:** $0 (after development)
-- **Development:** 8-10 weeks
+- **Development:** To be determined
 - **ROI:** High (but limited to mobile)
 
 ## Part 7: Recommendation
 
 **Immediate Path Forward:**
 
-1. **Week 1:** Implement temporal smoothing and confidence weighting
-2. **Week 2:** Collect labeled dataset with physiotherapist input
-3. **Weeks 3-4:** Train and deploy hybrid ML model
-4. **Week 5:** Production deployment with monitoring
+### Phase 1: Final MediaPipe Investigation
+- Review PostureScreen and open source Python implementations
+- Test face angle calculations (Normal Vector approach)
+- Combine face angle with back angle and shoulder-to-shoulder angle
+- Determine if improved algorithms can achieve acceptable accuracy
+
+### Phase 2: Advanced Model Testing (If Phase 1 Fails)
+**Testing sequence:**
+1. **Hugging Face Posture Detection Models** - Pre-trained models with fine-tuning potential
+2. **MMPose** - State-of-the-art but requires GPU server
+3. **OpenPose** - CMU's proven solution
+4. **ViTPose** - Latest vision transformer approach
 
 **Long-term Vision:**
-- Start with hybrid ML approach for immediate improvement
-- Evaluate user feedback and accuracy metrics
-- If accuracy < 85%, consider server-based deep learning
-- For premium users, offer native mobile app with best accuracy
+- If MediaPipe improvements work: Continue optimizing and deploy
+- If advanced models needed: Evaluate server costs vs accuracy gains
+- For premium users, consider native mobile app with platform APIs
 
 **Success Metrics:**
 - Accuracy: > 85% on test set
@@ -380,10 +369,10 @@ On-device ML → Real-time Posture Feedback
 ## Conclusion
 
 MediaPipe alone cannot provide clinical-grade posture detection. The path forward requires:
-1. **Immediate:** Better algorithms and temporal modeling
-2. **Short-term:** Machine learning on top of MediaPipe
-3. **Long-term:** Consider advanced pose estimation models or native apps
+1. **Phase 1:** Final attempt with enhanced MediaPipe algorithms (face angle, improved calculations)
+2. **Phase 2 (if needed):** Test advanced models in order: Hugging Face, MMPose, OpenPose, ViTPose
+3. **Long-term:** Deploy the most effective solution based on accuracy/cost trade-offs
 
-The hybrid ML approach offers the best balance of accuracy, cost, and development time. With proper data collection and model training, we can achieve 85-90% accuracy while maintaining the browser-based, privacy-preserving architecture.
+The final approach will be determined by Phase 1 results. If MediaPipe improvements succeed, we can maintain a browser-based, privacy-preserving architecture. If not, we'll systematically evaluate more advanced models.
 
-**Next Step:** Begin Phase 1 implementation while starting data collection for the ML model.
+**Next Step:** Begin Phase 1 - investigate PostureScreen and implement enhanced angle calculations.
