@@ -1,5 +1,7 @@
 # Posture Detection POC: Progress Report
-**Meeting Date:** January 8, 2025
+
+**Meeting Date:** August 5, 2025
+**Client:** Dr. Deb Roy
 
 ---
 
@@ -14,32 +16,40 @@ Here's the journey so far and why we need to change direction.
 ## The Story So Far
 
 ### First Attempt: PoseNet ❌
+
 Started with TensorFlow's PoseNet since it was the most popular pose detection model. Turned out to be a dead end:
+
 - Only 17 landmarks (not enough detail for posture)
 - No 3D coordinate support
 - Poor accuracy on subtle posture changes
 - TensorFlow deprecated it in favor of MoveNet
 
 ### Second Attempt: ElectronJS Desktop App ❌
+
 Thought maybe a desktop application would give better camera access and more accurate results. Built a proof of concept with ElectronJS:
+
 - Initially seemed more accurate
 - After testing, realized it was returning essentially the same results
 - The problem wasn't browser limitations - it was the underlying model
 
-### Current Attempt: MediaPipe Web ❌
+### Current Attempt: MediaPipe Web ❓
+
 Switched to Google's MediaPipe, which seemed promising with 33 body landmarks plus face detection. Built an extensive system with:
+
 - 8 different posture checks
 - Craniovertebral angle calculations for forward head detection
 - 3D coordinate analysis
 - Temporal smoothing over 5 frames
 - Shoulder width normalization
 
-**The result?** Still only ~60% accuracy. The system often thinks good posture is bad and sometimes rates bad posture as better than good.
+**The result?** Unknown but likely a failure - still only ~60% accuracy. The system often thinks good posture is bad and sometimes rates bad posture as better than good.
 
 ### What I Discovered
+
 After extensive testing and analysis, I found the core issue: MediaPipe places shoulder landmarks on the visible shoulder edge, not the actual joint. When someone turns sideways, it completely loses track of proper shoulder position.
 
 **Test results that show the problem:**
+
 - Good posture (side view) → 62% confidence
 - Bad posture (side view) → 75% confidence (higher than good!)
 - Elbow width measuring wider than shoulders (physically impossible)
@@ -65,31 +75,58 @@ This explains why the system can't detect rounded shoulders or forward head post
 
 ## Where We Go From Here
 
+### MediaPipe-Based Apps to Investigate
+
+Before moving on to other models, there are two MediaPipe-based applications that might be worth investigating further if the client wants:
+
+- **[OFP](https://github.com/jimothytries/OFP)** - A hobby app using MediaPipe for posture detection
+- **[PostureScreen](https://www.postureanalysis.com/posturescreen-posture-movement-body-composition-analysis-assessment/)** - A commercial posture analysis application
+
+Most apps I've seen using pose detection use a side-on camera view, and the results don't look particularly accurate, but these two might offer insights into how others have approached the problem.
+
+### Further Research Into Other Models
+
+I've conducted additional research into off-the-shelf posture detection solutions (see [Perplexity Research Summary](./perplexity-off-the-shelf-2025-08-08.md)). Key findings include:
+
+- **SitPose (2024):** Achieving 98.1% F1 score using ensemble learning with Azure Kinect depth camera
+- **YOLOv5 Sitting Posture Detection:** Open-source real-time lateral posture detection from webcam streams
+- **LSTM/Transformer temporal models:** State-of-the-art for posture evaluation over time
+- **Edge AI deployment:** Using Jetson Nano or Coral TPU for local, privacy-preserving inference
+- **Cost-reduction strategies:** Federated learning, synthetic data generation, and multi-tenant GPU solutions to achieve <$10/user/month
+
 Based on my research, here's the planned testing sequence:
 
 ### Phase 1: Google Model Evaluation
+
 We'll start with Google's ecosystem since we're already familiar with it:
+
 - **MoveNet (TensorFlow.js)** - Browser-based, free, three variants to test
 - **MediaPipe Server-Side** - Python/Node.js versions might have better accuracy
 - **BlazePose Variants** - Test full, lite, and heavy versions
 - **Google Cloud Vision API** - Their commercial offering
 
 ### Phase 2: Advanced Open-Source Models
+
 If Google's options don't meet our needs:
+
 - **MMPose** - Current state-of-the-art, needs GPU server
 - **OpenPose** - CMU's battle-tested solution
 - **ViTPose** - Latest vision transformer approach
 - **Apple Vision Framework** - For comparison (iOS only)
 
 ### Phase 3: Deployment Strategy Testing
+
 Parallel to model evaluation:
+
 - **Interval Capture** - Test taking snapshots every 30s/60s/5min
 - **Batch Processing** - Calculate server costs for image processing
 - **Real-time vs Periodic** - Compare infrastructure requirements
 - **Privacy Analysis** - Evaluate data handling for each approach
 
 ### Phase 4: Browser Alternatives
+
 Other browser-compatible options:
+
 - **ONNX Runtime Web** - Run pre-trained models in browser
 - **TensorFlow.js Models** - Beyond just MoveNet
 - **WebAssembly Solutions** - High-performance browser execution
@@ -100,12 +137,12 @@ Other browser-compatible options:
 
 Here's what we're looking at for different approaches:
 
-| Approach | Expected Accuracy | Cost per User/Month | Infrastructure Needs |
-|----------|------------------|---------------------|---------------------|
-| MoveNet (browser) | Unknown | $0 | None |
-| Cloud Vision API | Unknown | ~$50 | API integration |
-| MMPose (GPU server) | 90%+ | ~$3-5 | Shared GPU server |
-| Interval snapshots | Depends on model | ~$5 | Minimal server |
+| Approach            | Expected Accuracy | Cost per User/Month | Infrastructure Needs |
+| ------------------- | ----------------- | ------------------- | -------------------- |
+| MoveNet (browser)   | Unknown           | $0                  | None                 |
+| Cloud Vision API    | Unknown           | ~$50                | API integration      |
+| MMPose (GPU server) | 90%+              | ~$3-5               | Shared GPU server    |
+| Interval snapshots  | Depends on model  | ~$5                 | Minimal server       |
 
 The target is finding something with >80% accuracy for under $10 per user per month.
 
@@ -140,5 +177,7 @@ Before I proceed with testing, it would help to know:
 ## Additional Resources
 
 I've documented the detailed research in separate files:
+
 - [Comprehensive Research Plan](./research-plan.md) - Analysis of all alternatives
 - [Academic Research Findings](./deep-research-2025-08-07.md) - What the literature says about posture detection
+- [Off-the-Shelf Solutions Research](./perplexity-off-the-shelf-2025-08-08.md) - State-of-the-art posture detection landscape (2024-2025)
