@@ -5,15 +5,13 @@
 
 ---
 
-## Where We Started
+## POC Goal
 
-The goal was straightforward: build a system that can tell when someone has bad posture while working at their desk. I wanted something accurate, affordable, and privacy-conscious that could run in a web browser.
-
-Here's the journey so far and why we need to change direction.
+The goal was straightforward: build a system that can tell when someone has bad posture while working at their desk. We wanted something accurate, affordable, and privacy-conscious that could run in a web browser.
 
 ---
 
-## The Story So Far
+## Progress
 
 ### First Attempt: PoseNet ❌
 
@@ -24,21 +22,21 @@ Started with TensorFlow's PoseNet since it was the most popular pose detection m
 - Poor accuracy on subtle posture changes
 - TensorFlow deprecated it in favor of MoveNet
 
-### Second Attempt: ElectronJS Desktop App ❌
+### Second Attempt: ElectronJS Desktop App ❓
 
-Thought maybe a desktop application would give better camera access and more accurate results. Built a proof of concept with ElectronJS:
+Initially I had marked down the bad accuracy, particularly in the shoulders to the camera in PWA.
 
-- Initially seemed more accurate
-- After testing, realized it was returning essentially the same results
-- The problem wasn't browser limitations - it was the underlying model
+I switched over to using ElectronJS, which is a popular cross-platform desktop framework.
+
+- The camera wasn't the issue for accuracy (see next section)
+- ElectronJS does allow us to run the application in the Tray (hidden) so it will probably be the ultimate release platform
 
 ### Current Attempt: MediaPipe Web ❓
 
-Switched to Google's MediaPipe, which seemed promising with 33 body landmarks plus face detection. Built an extensive system with:
+Switched to Google's MediaPipe (I had switched to MediaPipe within the Electron App), which seemed promising with 33 body landmarks plus face detection. Built an extensive system with:
 
 - 8 different posture checks
 - Craniovertebral angle calculations for forward head detection
-- 3D coordinate analysis
 - Temporal smoothing over 5 frames
 - Shoulder width normalization
 
@@ -46,7 +44,10 @@ Switched to Google's MediaPipe, which seemed promising with 33 body landmarks pl
 
 ### What I Discovered
 
-After extensive testing and analysis, I found the core issue: MediaPipe places shoulder landmarks on the visible shoulder edge, not the actual joint. When someone turns sideways, it completely loses track of proper shoulder position.
+After extensive testing and analysis, I found the core issue: MediaPipe places shoulder landmarks near where it thinks the shoulder joint is.
+With my testing, I've found the placement of the landmarks to be inaccurate.
+
+When you turn sideways, it can still track the shoulder joints, arm angles and back angles (if available) but it's not accurate.
 
 **Test results that show the problem:**
 
@@ -85,97 +86,34 @@ Before moving on to other models, there are two MediaPipe-based applications tha
 Most apps I've seen using pose detection use a side-on camera view, and the results don't look particularly accurate, but these two might offer insights into how others have approached the problem.
 
 **Initial findings from PostureScreen investigation:**
+
 - Side-view camera, while not great, could be an option for detecting back angles
-- Using face landmarks to determine the z-index of the face (which way it's pointing), in conjunction with other pose landmarks, could help determine if the user is looking down/up rather than straight ahead - potentially useful for approximating slouch
+- Using face landmarks to determine which way the face is pointing, in conjunction with other pose landmarks, could help determine if the user is looking down/up rather than straight ahead - potentially useful for approximating slouch
 
 ### Further Research Into Other Models
 
 I've conducted additional research into off-the-shelf posture detection solutions (see [Research Summary](./perplexity-off-the-shelf-2025-08-08.md)). Key findings include:
 
-- **SitPose (2024):** Achieving 98.1% F1 score using ensemble learning with Azure Kinect depth camera
-- **YOLOv5 Sitting Posture Detection:** Open-source real-time lateral posture detection from webcam streams
-- **LSTM/Transformer temporal models:** State-of-the-art for posture evaluation over time
-- **Edge AI deployment:** Using Jetson Nano or Coral TPU for local, privacy-preserving inference
-- **Cost-reduction strategies:** Federated learning, synthetic data generation, and multi-tenant GPU solutions to achieve <$10/user/month
+- **SitPose (2024):** Achieving 98.1% F1 score using ensemble learning with Azure Kinect depth camera (not viable)
+- **YOLOv5 Sitting Posture Detection:** Open-source real-time lateral posture detection from webcam streams (needs more research)
+- **Edge AI deployment:** Using Jetson Nano or Coral TPU for local, privacy-preserving inference (needs more research)
 
 Based on my research, here's the planned testing sequence:
 
-### Phase 1: Google Model Evaluation
+### Phase 1: Final test on MediaPipe as solution
 
-We'll start with Google's ecosystem since we're already familiar with it:
+I'll investigate further PostureScreen and the open source Python app to determine if there are more algorithms that can be used.
 
-- **MoveNet (TensorFlow.js)** - Browser-based, free, three variants to test. **Briefly tested** - more accurate than MediaPipe but suffers from the same fundamental issue: will likely need a side-on view to determine back angles to approximate slouch
-- **MediaPipe Server-Side** - Python/Node.js versions might have better accuracy
-- **BlazePose Variants** - Test full, lite, and heavy versions. **Briefly tested** - similar limitations as MoveNet
-- **Google Cloud Vision API** - Their commercial offering
+Update algorithm to calculate Face angle (Normal Vector?) and see if we can use that in conjunction with back angle and shoulder to should angle to determine bad posture.
 
 ### Phase 2: Advanced Open-Source Models
 
-If Google's options don't meet our needs:
+If that doesn't work:
 
 - **Hugging Face Posture Detection Models** - Investigating [postureDetection](https://huggingface.co/ronka/postureDetection/tree/main) which has extensive training data and potential for fine-tuning
 - **MMPose** - Current state-of-the-art, needs GPU server
 - **OpenPose** - CMU's battle-tested solution
 - **ViTPose** - Latest vision transformer approach
-- **Apple Vision Framework** - For comparison (iOS only)
-
-### Phase 3: Deployment Strategy Testing
-
-Parallel to model evaluation:
-
-- **Interval Capture** - Test taking snapshots every 30s/60s/5min
-- **Batch Processing** - Calculate server costs for image processing
-- **Real-time vs Periodic** - Compare infrastructure requirements
-- **Privacy Analysis** - Evaluate data handling for each approach
-
-### Phase 4: Browser Alternatives
-
-Other browser-compatible options:
-
-- **ONNX Runtime Web** - Run pre-trained models in browser
-- **TensorFlow.js Models** - Beyond just MoveNet
-- **WebAssembly Solutions** - High-performance browser execution
-
----
-
-## Cost Considerations
-
-Here's what we're looking at for different approaches:
-
-| Approach            | Expected Accuracy | Cost per User/Month | Infrastructure Needs |
-| ------------------- | ----------------- | ------------------- | -------------------- |
-| MoveNet (browser)   | Unknown           | $0                  | None                 |
-| Cloud Vision API    | Unknown           | ~$50                | API integration      |
-| MMPose (GPU server) | 90%+              | ~$3-5               | Shared GPU server    |
-| Interval snapshots  | Depends on model  | ~$5                 | Minimal server       |
-
-The target is finding something with >80% accuracy for under $10 per user per month.
-
----
-
-## Next Steps
-
-The plan is structured to find the cheapest effective solution:
-
-1. **Week 1: Google Models** - Test MoveNet, BlazePose variants, and MediaPipe server-side. These are the quickest to evaluate.
-
-2. **Week 2: Cost Analysis** - For each promising model, calculate real costs including infrastructure, API calls, and maintenance.
-
-3. **Week 3: Advanced Models** - If needed, test MMPose and OpenPose with GPU requirements.
-
-4. **Final Deliverable** - A comparison matrix showing accuracy, cost, latency, and deployment complexity for each option, with top 3 recommendations.
-
----
-
-## Questions for Discussion
-
-Before I proceed with testing, it would help to know:
-
-- What accuracy level would you consider acceptable for clinical use?
-- What's the maximum acceptable cost per user?
-- Are there privacy concerns about server-side processing?
-- Would periodic checks (every minute) be acceptable vs real-time?
-- What scale are we planning for (affects infrastructure decisions)?
 
 ---
 
